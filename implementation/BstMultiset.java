@@ -14,7 +14,7 @@ public class BstMultiset extends RmitMultiset{
 	int size;
   String output ;
   List<String> keysResult;
-
+  BstMultiset newSet;
 	public BstMultiset() {
 
 		root = null;
@@ -98,15 +98,39 @@ public class BstMultiset extends RmitMultiset{
 		return new String();
 	} // end of printRange()
 
-	@Override
+  @Override
 	public RmitMultiset union(RmitMultiset other) {
+    BstMultiset newSet = new BstMultiset();
+
+		if (other instanceof BstMultiset) {
+
+  		BstMultiset otherSet = (BstMultiset) other;
+      newSet = this;
+  		this.unionRecursive(otherSet.getRoot(), newSet);
+		}
+
+		if (newSet.getSize(newSet.getRoot()) > 0)
+			return newSet;
 
 		// Placeholder, please update.
 		return null;
 	} // end of union()
 
+
 	@Override
 	public RmitMultiset intersect(RmitMultiset other) {
+
+		BstMultiset interSet = new BstMultiset();
+
+		if (other instanceof BstMultiset) {
+
+			BstMultiset otherSet = (BstMultiset) other;
+			intersectRecursive(root, otherSet, interSet);
+      interSet.print();
+		}
+
+		if (interSet.getSize(interSet.getRoot()) > 0)
+			return interSet;
 
 		// Placeholder, please update.
 		return null;
@@ -115,14 +139,38 @@ public class BstMultiset extends RmitMultiset{
 	@Override
 	public RmitMultiset difference(RmitMultiset other) {
 
+    BstMultiset diffSet = new BstMultiset();
+
+    if (other instanceof BstMultiset) {
+
+      BstMultiset otherSet = (BstMultiset) other;
+
+      diffRecursive(root, otherSet, diffSet);
+
+    }
+
+    if (diffSet.getSize(diffSet.getRoot()) > 0)
+      return diffSet;
 		// Placeholder, please update.
 		return null;
 	} // end of difference()
 
-	/*
+	/*###################################
+  ####################################
 	 * Other added methods on comparing stirng if result would be positive the item
 	 * is greater than root else lesser than root
 	 */
+
+// getter and setter
+   public TreeNode getRoot() {
+ 		return root;
+ 	}
+
+ 	public void setRoot(TreeNode root) {
+ 		this.root = root;
+ 	}
+
+
    // this is adding a item with instance value on the node
  	public void add(String item, Integer value) {
  		// Implement me!
@@ -155,9 +203,8 @@ public class BstMultiset extends RmitMultiset{
 
   public TreeNode insertRecursuively(TreeNode root, String item, Integer value) {
       // Implement me!
-
     if (root == null) {
-      root = new TreeNode(item);
+      root = new TreeNode(item, value);
       return root;
     }
     else {
@@ -170,6 +217,7 @@ public class BstMultiset extends RmitMultiset{
       }
       else if (item.compareTo(root.getKey()) == 0){
         root.setValue(root.getValue() + value);
+
       }
     }
     return root;
@@ -233,19 +281,21 @@ public void inorderTraversal(TreeNode root, String lower, String upper) {
 */
   public int getNodeValueIfExist(TreeNode node, String item){
 
-    if (node == null){
-      return searchFailed;
+    while(node != null){
+
+        if (item.compareTo(node.getKey()) > 0){
+          node = node.getRightTree();
+        }
+        else if (item.compareTo(node.getKey()) < 0){
+          node = node.getLeftTree();
+        }
+        else if (item.compareTo(node.getKey()) == 0){
+          return node.getValue();
+        }
     }
 
-    if (node.getKey().equals(item)){
-      return node.getValue();
-    }
-    int value = getNodeValueIfExist(node.getLeftTree(), item);
-    if (value != searchFailed)
-      return value;
+    return searchFailed;
 
-    value = getNodeValueIfExist(node.getLeftTree(), item);
-    return value;
   }
 
 
@@ -267,12 +317,7 @@ public void inorderTraversal(TreeNode root, String lower, String upper) {
 
   }
 
-  /*
- * First case if root null return root;
- * second case traverse through the node to find the exact key and remove that
- * third case node with only one or no child case
- * last one node with two children case
- * */
+
 
 public TreeNode findMinElement(TreeNode root) {
   if (root.getLeftTree() == null) {
@@ -282,43 +327,140 @@ public TreeNode findMinElement(TreeNode root) {
     return findMinElement(root.getLeftTree());
   }
 }
-
+/*
+*first case node with no leaf
+* second case node with one node or no left node
+* third case node with one node or no right node
+*
+* last one node with two children case
+* */
 public TreeNode removeRecursively(TreeNode root, String key) {
 
-  if (root == null)
-    return root;
+	  if (root == null)
+	    return root;
 
-  if (key.compareTo(root.getKey())< 0){
-    root.setLeftTree(removeRecursively(root.getLeftTree(), key));
+	  if (key.compareTo(root.getKey())< 0){
+	    root.setLeftTree(removeRecursively(root.getLeftTree(), key));
+	  }
+	  else if (key.compareTo(root.getKey())> 0){
+	    root.setRightTree(removeRecursively(root.getRightTree(), key));
+	  }
+	  else {
+
+
+
+		  if (root.getLeftTree() == null && root.getRightTree() == null) {
+			  if (root.getValue() > 1 ) {
+				  root.setValue(root.getValue() - 1);
+				  return root;
+			  }
+			  return null;
+		  }
+		  else if (root.getLeftTree() == null) {
+
+			  if (root.getValue() > 1 ) {
+				  root.setValue(root.getValue() - 1);
+				  return root;
+			  }
+			  return root.getRightTree();
+		  }
+		  else if (root.getRightTree() == null) {
+			  if (root.getValue() > 1 ) {
+				  root.setValue(root.getValue() - 1);
+				  return root;
+			  }
+			  return root.getRightTree();
+		  }
+		  else {
+			  TreeNode temp = root;
+			  TreeNode minNode =  findMinElement(temp.getRightTree());
+			  root.setKey(minNode.getKey());
+		      root.setValue(minNode.getValue());
+		      root.setRightTree(removeRecursively(root.getRightTree(), minNode.getKey()));
+		  }
+
+
+	  }
+
+
+
+	  return root;
+	}
+
+// This is a recursive method and the extension of the intersect
+public void intersectRecursive(TreeNode root, BstMultiset other , BstMultiset newSet) {
+
+  if (root != null ){
+
+      intersectRecursive(root.getLeftTree(), other, newSet);
+      int keyValue = other.search(root.getKey());
+      if (keyValue != searchFailed){
+        int value;
+        if (root.getValue() == keyValue){
+            value = keyValue;
+        }
+        else{
+            value = root.getValue() > keyValue ? keyValue : root.getValue();
+        }
+
+          newSet.add(root.getKey(), value);
+      }
+
+      intersectRecursive(root.getRightTree(), other, newSet);
+
   }
-  else if (key.compareTo(root.getKey())> 0){
-    root.setRightTree(removeRecursively(root.getRightTree(), key));
-  }
-  else {
 
-    if (root.getLeftTree() != null && root.getRightTree() != null) {
-
-      TreeNode temp = root;
-      TreeNode minNode =  findMinElement(temp.getRightTree());
-      root.setKey(minNode.getKey());
-      root.setValue(minNode.getValue());
-      root.setRightTree(removeRecursively(root.getRightTree(), minNode.getKey()));
-    }
-    else if(root.getLeftTree() != null) {
-      root = root.getLeftTree();
-    }
-    else if(root.getRightTree() != null) {
-      root = root.getRightTree();
-    }
-    else
-      root = null;
-
-  }
-
-
-
-  return root;
 }
 
+// This is a recursive method and the extension of the unionSet
+public void unionRecursive(TreeNode other, BstMultiset newSet) {
+  if (other != null){
+
+      unionRecursive( other.getLeftTree(), newSet );
+
+      newSet.add(other.getKey(), other.getValue());
+
+      unionRecursive( other.getRightTree(), newSet );
+  }
+
+}
+
+
+// This is a recursive method and the extension of the diffSet
+public void diffRecursive(TreeNode root, BstMultiset other , BstMultiset newSet) {
+
+  if (root != null ){
+
+      diffRecursive(root.getLeftTree(), other, newSet);
+
+      int keyValue = other.search(root.getKey());
+      if (keyValue != searchFailed){
+        int value;
+
+        if (root.getValue() > keyValue){
+          value = root.getValue() - keyValue;
+          newSet.add(root.getKey(), value);
+        }
+
+      }
+      else{
+
+        newSet.add(root.getKey(), root.getValue());
+
+      }
+
+      diffRecursive(root.getRightTree(), other, newSet);
+
+  }
+
+}
+
+public int getSize(TreeNode node)
+{
+    if (node == null)
+        return 0;
+    else
+        return(getSize(node.getLeftTree()) + 1 + getSize(node.getRightTree()));
+}
 
 }  // end of class BstMultiset

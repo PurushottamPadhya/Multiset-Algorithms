@@ -2,11 +2,13 @@ package implementation;
 
 public class TreeNode {
 
+// parameters
 	String key;
   Integer value ;
 
 	TreeNode leftTree, rightTree;
 
+// constructor
 	public TreeNode(String key) {
 		this.key = key;
     value = 1;
@@ -18,6 +20,7 @@ public class TreeNode {
     leftTree = rightTree = null;
   }
 
+// getter and setter
 	public String getKey() {
 		return this.key;
 	}
@@ -52,5 +55,7 @@ public class TreeNode {
 	public void setRightTree(TreeNode rightTree) {
 		this.rightTree = rightTree;
 	}
+
+
 
 }
